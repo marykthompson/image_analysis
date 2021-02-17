@@ -22,7 +22,7 @@ class Outline(object):
             self.files = [self.input]
         self.extension = self.files[0].split('.')[1]
         if self.extension == 'zip':
-            self.format == 'roi'
+            self.format = 'roi'
         elif self.extension == 'tif':
             self.format = 'tif'
         else:
