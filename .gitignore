@@ -1,3 +1,6 @@
 *
 !.gitignore
 !scripts
+!scripts/*
+!param_examples
+!param_examples/*

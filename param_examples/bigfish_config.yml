@@ -1,0 +1,22 @@
+#preprocessing parameters
+#provide 1-based channel number for dapi and fish image
+dapi_ch: 405
+fish_ch: 561
+camera_bg: 150
+#segmentation parameters
+size_scale: 8
+nuc_diameter: 25
+#microscope paramaters
+voxel_size_xy: 65
+voxel_size_z: 200
+#enter lens NA, RI of oil (or mounting medium?). Ex/Em of the dye (not the filter, right?)
+NA: 1.45
+RI: 1.518
+Ex: 548
+Em: 563
+microscope: confocal
+#Big Fish parameters
+#cluster radius, (in nm) for spots to be considered a cluster.
+cluster_radius: 2000
+#min number of RNAs to form a cluster
+nb_in_cluster: 5
