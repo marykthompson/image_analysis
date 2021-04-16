@@ -1,8 +1,9 @@
 #preprocessing parameters
-#provide 1-based channel number for dapi and fish image
+#provide channel name for dapi and fish image
 dapi_ch: 405
 fish_ch: 561
 camera_bg: 150
+rolling_ball_radius: 15
 #segmentation parameters
 size_scale: 8
 nuc_diameter: 25
@@ -17,6 +18,8 @@ Em: 563
 microscope: confocal
 #Big Fish parameters
 #cluster radius, (in nm) for spots to be considered a cluster.
-cluster_radius: 2000
+foci_radius: 2000
 #min number of RNAs to form a cluster
-nb_in_cluster: 5
+nb_in_foci: 5
+#max value for plotting images. Recommend to set as 2X single RNA intensity.
+vmax: 800

@@ -6,6 +6,7 @@
 from __future__ import unicode_literals, print_function
 import numpy as np
 import skimage.io as skio
+from skimage import color, morphology, restoration
 import os
 import os
 import collections
@@ -107,7 +108,33 @@ def read_image(path):
     #return metadata
     return metadata, img_dict
 
-def bg_subtract(img_dict, outpath, args):
+def rollingball_bg_subtract(img_dict, outpath, args):
+    '''
+    Find all the converted .tif files in the directory, assign experiment name,
+    read image, bg subtract, and save as outdir/expname_dapi.tif; outdir/expname_fish.tif.
+    For speed reasons, I am not going to background subtract the dapi image. I
+    do not think that it is necessary for CellPose segmentation.
+    '''
+    fish_img = img_dict[str(args.fish_ch)]
+    dapi_img = img_dict[str(args.dapi_ch)]
+
+    radius = args.rolling_ball_radius
+
+    bg_sub = []
+    for i in fish_img:
+        bg = restoration.rolling_ball(i, radius = radius)
+        res = i - bg
+        bg_sub.append(res)
+    fish_sub = np.array(bg_sub)
+
+    #output as tif files.
+    outfish = f'{outpath}_fish.tif'
+    outdapi = f'{outpath}_dapi.tif'
+
+    skio.imsave(outfish, fish_sub, plugin = 'tifffile')
+    skio.imsave(outdapi, dapi_img, plugin = 'tifffile')
+
+def camera_bg_subtract(img_dict, outpath, args):
     '''
     Find all the converted .tif files in the directory, assign experiment name,
     read image, bg subtract, and save as outdir/expname_dapi.tif; outdir/expname_fish.tif
@@ -137,4 +164,7 @@ def run(img_file, args):
     outname = os.path.basename(img_file).rstrip('.vsi')
     outpath = os.path.join(args.outdir, 'images', outname)
     metadata, img_dict = read_image(img_file)
-    bg_subtract(img_dict, outpath, args)
+    if hasattr(args, 'camera_bg') and args.use_camera_bg:
+        camera_bg_subtract(img_dict, outpath, args)
+    elif hasattr(args, 'use_rolling_ball') and args.use_rolling_ball:
+        rollingball_bg_subtract(img_dict, outpath, args)

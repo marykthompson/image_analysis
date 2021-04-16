@@ -29,7 +29,7 @@ def segment(img_dir, outdir, size_scale, nuc_diameter):
     # Parameters
     path_scan = Path(r'%s' % img_dir)            # For example data: example_data\analysis\segmentation-input
     path_save = Path(r'%s' % outdir)
-    obj_name='nuclei',                                 # Name of object that should be segmented
+    obj_name='nuclei'                                 # Name of object that should be segmented
     str_channel = 'dapi'                                # Identifier of channel for nuclear segmentation
     img_ext = '.png'                                   # Extension of images to be segmented
     new_size = (size_scale,)                                   # Size of images (tuple with 1 element for scaling factor, tuple with 2 elements for new size)
