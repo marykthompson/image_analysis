@@ -1,25 +1,40 @@
 #preprocessing parameters
 #provide channel name for dapi and fish image
-dapi_ch: 405
-fish_ch: 561
-camera_bg: 150
+experiment_name: socs36e_nmj_210403
+dapi_ch: 405-95B
+fish_ch: 561-95B
+#camera_bg: 150
+#use_camera_bg: True
+use_rolling_ball: True
 rolling_ball_radius: 15
 #segmentation parameters
 size_scale: 8
-nuc_diameter: 25
+nuc_diameter: 15
 #microscope paramaters
-voxel_size_xy: 65
+voxel_size_yx: 110
 voxel_size_z: 200
+#add single spot threshold here if not using the automated thresholding
+#manual_threshold: 150
 #enter lens NA, RI of oil (or mounting medium?). Ex/Em of the dye (not the filter, right?)
 NA: 1.45
 RI: 1.518
 Ex: 548
 Em: 563
 microscope: confocal
-#Big Fish parameters
-#cluster radius, (in nm) for spots to be considered a cluster.
-foci_radius: 2000
-#min number of RNAs to form a cluster
-nb_in_foci: 5
+#BigFISH parameters
+#cluster radius, (in nm) for spots to be considered a focus.
+foci_radius: 350
+#min number of RNAs to form a focus
+nb_in_foci: 4
 #max value for plotting images. Recommend to set as 2X single RNA intensity.
-vmax: 800
+vmax: 500
+#Give the image names here (just basename, without full path) of images to include
+#Only use included_images to run on a subset of the images, otherwise will run whole directory
+#Alternatively, exclude excluded_images and run on all other .vsi images in the directory
+included_images:
+- OrR_socs36e_L1S4L_mock.vsi
+#- OrR_socs36e_L1S4L_stim.vsi
+
+#excluded_images:
+#- 000.vsi
+#- dark.vsi

@@ -6,6 +6,7 @@ import yaml
 import glob
 import pandas as pd
 import run_cp
+import postprocess
 from run_spot_quant import SpotDetector
 import run_preprocess
 import bioformats as bf
@@ -19,18 +20,22 @@ def preprocess(args):
     logger = run_preprocess._init_logger()
     os.makedirs(os.path.join(args.outdir, 'images'), exist_ok = True)
     vsi_files = [f.path for f in os.scandir(args.acq_dir) if f.name.endswith('.vsi')]
-    #check if 'included_images' is in args
+    #check if 'included_images or excluded images' is in args
     if hasattr(args, 'included_images'):
         imagelist = [os.path.join(args.acq_dir, i) for i in args.included_images]
         vsi_files = [i for i in vsi_files if i in imagelist]
+    elif hasattr(args, 'excluded_images'):
+        excluded_images = [os.path.join(args.acq_dir, i) for i in args.excluded_images]
+        vsi_files = [i for i in vsi_files if i not in excluded_images]
     for i in vsi_files:
         run_preprocess.run(i, args)
     jb.kill_vm()
 
-def bigfish(indir, args):
+def run_cellpose(indir, args):
     #run cellPose segmentation on dapi images
     run_cp.run(indir, args.size_scale, args.nuc_diameter)
 
+def bigfish(indir, args):
     #run bigfish quantification on each fov:
     infiles = os.listdir(indir)
     fov_names = [i.split('fish.tif')[0] for i in infiles if i.endswith('fish.tif')]
@@ -43,19 +48,7 @@ def bigfish(indir, args):
         detector.run()
         detector.write_log(args)
 
-    #summarize results from all FOV and put here:
-    res_files = glob.glob(os.path.join(args.outdir, 'results', '*_results.csv'))
-    expnames = [os.path.basename(i).split('_results.csv')[0] for i in res_files]
-    res_dfs = []
-    for i, file in enumerate(res_files):
-        df = pd.read_csv(file, index_col = 0)
-        df['fov_name'] = expnames[i]
-        res_dfs.append(df)
-
-    res_df = pd.concat(res_dfs)
-    cols_to_write = ['fov_name', 'nb_nascent', 'nb_rna', 'nb_rna_in_nuc',
-                     'nb_rna_out_nuc', 'nb_foci', 'nb_transcription_site']
-    res_df[cols_to_write].to_csv(os.path.join(args.outdir, 'results', 'all_fov_summary.csv'), index=False)
+    postprocess.summarize_experiments(args.outdir, os.path.join('results', f'{args.experiment_name}'))
 
 def main(arglist):
     parser = argparse.ArgumentParser()
@@ -64,6 +57,7 @@ def main(arglist):
     parser.add_argument('--config', help = '.yml file containing parameters for analysis')
     parser.add_argument('--preprocess', action = 'store_true', default = False, help = 'only run preprocessing')
     #If --bigfish, acq_dir should be the directory containing the prepared _fish.tif and _dapi.tif files
+    parser.add_argument('--cellpose', action = 'store_true', default = False, help = 'only run cellpose')
     parser.add_argument('--bigfish', action = 'store_true', default = False, help = 'only run bigfish pipeline.')
     #parser.add_argument('--imagelist', help = 'text file containing names of images to process instead of all images')
     args = parser.parse_args()
@@ -82,10 +76,15 @@ def main(arglist):
 
     if args.preprocess:
         preprocess(args)
+    elif args.cellpose:
+        #run_cellpose(os.path.join(args.acq_dir, 'images'), args)
+        run_cellpose(os.path.join(args.outdir, 'images'), args)
     elif args.bigfish:
-        bigfish(os.path.join(args.acq_dir, 'images'), args)
+        #bigfish(os.path.join(args.acq_dir, 'images'), args)
+        bigfish(os.path.join(args.outdir, 'images'), args)
     else:
         preprocess(args)
+        run_cellpose(os.path.join(args.outdir, 'images'), args)
         #indirectory is now the directory with preprocessed images
         bigfish(os.path.join(args.outdir, 'images'), args)
 

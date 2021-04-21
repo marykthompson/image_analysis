@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import os
 import fish_plots
+import postprocess
 
 def calculate_psf(voxel_size_z, voxel_size_yx, Ex, Em, NA, RI, microscope):
     '''
@@ -176,7 +177,7 @@ class SpotDetector(object):
         self.fov_results = stack.extract_cell(cell_label=cell_label, ndim=3,
                                               nuc_label=nuc_label,
                                               rna_coord=self.spots_no_ts,
-                                              others_coord={"foci": self.foci,
+                                              others_coord={"foci": self.non_ts_foci,
                                               "transcription_site": self.ts},
                                               image=image_contrasted,
                                               others_image={"dapi": self.nuc_mip,
@@ -271,5 +272,5 @@ class SpotDetector(object):
         self.plot_foci()
         self.assign_foci_ts()
         self.plot_fov()
-        self.summarize_fov()
+        #self.summarize_fov()
         self.save_arrays()
